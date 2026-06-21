@@ -34,6 +34,10 @@
       user-select: none;
     }
 
+    body.sidebar-collapsed .brand-mark {
+      left: 50px;
+    }
+
     .brand-mark .name {
       display: block;
       font-size: 18px;
@@ -66,6 +70,10 @@
       gap: 40px;
       justify-items: center;
       padding: 40px 20px 40px 220px;
+    }
+
+    body.sidebar-collapsed .deck {
+      padding-left: 50px;
     }
 
     .slide {
@@ -138,6 +146,59 @@
       background: rgba(255, 255, 255, 0.96);
       padding: 16px 12px;
       overflow-y: auto;
+      transition: width 0.18s ease, padding 0.18s ease;
+    }
+
+    .sidebar-toggle {
+      position: fixed;
+      z-index: 55;
+      top: 50%;
+      left: 187px;
+      width: 24px;
+      height: 58px;
+      border: 1px solid var(--line);
+      border-left-color: var(--white);
+      border-radius: 0 6px 6px 0;
+      background: var(--white);
+      color: var(--black);
+      font: inherit;
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: left 0.18s ease, background 0.14s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--soft);
+    }
+
+    .sidebar-toggle .icon {
+      display: block;
+      transform: translateX(-1px);
+    }
+
+    body.sidebar-collapsed .page-sidebar {
+      width: 18px;
+      padding-left: 0;
+      padding-right: 0;
+      overflow: hidden;
+    }
+
+    body.sidebar-collapsed .page-sidebar > :not(.sidebar-toggle) {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    body.sidebar-collapsed .sidebar-toggle {
+      left: 17px;
+      border-left-color: var(--line);
+      border-radius: 0 6px 6px 0;
+    }
+
+    body.sidebar-collapsed .sidebar-toggle .icon {
+      transform: translateX(1px);
     }
 
     .add-slide,

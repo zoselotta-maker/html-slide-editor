@@ -364,10 +364,17 @@
         if (!sidebar) {
           sidebar = document.createElement("aside");
           sidebar.className = "page-sidebar";
-          sidebar.innerHTML = `<button class="add-slide" type="button">장표 추가</button><button class="export-html" type="button">HTML 저장</button><div class="page-list"></div>`;
+          sidebar.innerHTML = `<button class="sidebar-toggle" type="button" aria-label="슬라이드 인덱스 접기" title="슬라이드 인덱스 접기"><span class="icon">◀</span></button><button class="add-slide" type="button">장표 추가</button><button class="export-html" type="button">HTML 저장</button><div class="page-list"></div>`;
           document.body.prepend(sidebar);
           sidebar.querySelector(".add-slide").addEventListener("click", addSlide);
           sidebar.querySelector(".export-html").addEventListener("click", exportHtml);
+          sidebar.querySelector(".sidebar-toggle").addEventListener("click", () => {
+            const collapsed = document.body.classList.toggle("sidebar-collapsed");
+            const toggle = sidebar.querySelector(".sidebar-toggle");
+            toggle.querySelector(".icon").textContent = collapsed ? "▶" : "◀";
+            toggle.setAttribute("aria-label", collapsed ? "슬라이드 인덱스 펼치기" : "슬라이드 인덱스 접기");
+            toggle.title = collapsed ? "슬라이드 인덱스 펼치기" : "슬라이드 인덱스 접기";
+          });
         }
         const slides = orderedSlides();
         const list = sidebar.querySelector(".page-list");
