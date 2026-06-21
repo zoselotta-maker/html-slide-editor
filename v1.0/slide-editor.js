@@ -25,6 +25,11 @@
         ["image", "이미지"],
         ["visual-note", "비주얼노트"]
       ];
+      const themeTypes = [
+        ["gray", "Gray", "기본 흑백/그레이 톤"],
+        ["blue", "Blue", "차분한 블루 톤"],
+        ["purple", "Purple", "부드러운 퍼플 톤"]
+      ];
       const selector = [
         "h1", "h2", "h3", "p", "li",
         ".toc-item span", ".card .step", ".panel .label", ".note-panel .label",
@@ -55,6 +60,7 @@
       };
       let deckData = readDeckData();
       deckData.slides = Array.isArray(deckData.slides) ? deckData.slides : [];
+      deckData.theme = deckData.theme || localStorage.getItem("html-slide-editor-theme") || "gray";
 
       const writeDeckData = () => {
         const json = JSON.stringify(deckData, null, 2).replaceAll("</script", "<\\/script");
@@ -64,6 +70,22 @@
       const orderedSlides = () => Array.from(deck.querySelectorAll(".slide"));
       const dataForSlide = (slide) => deckData.slides.find((item) => item.id === slide.dataset.slideId);
       const typeLabel = (type) => templateTypes.find(([key]) => key === type)?.[1] || "장표";
+      const themeLabel = (theme) => themeTypes.find(([key]) => key === theme)?.[1] || "Gray";
+      const applyTheme = (theme = "gray", persist = false) => {
+        const nextTheme = themeTypes.some(([key]) => key === theme) ? theme : "gray";
+        document.body.classList.remove("theme-gray", "theme-blue", "theme-purple");
+        document.body.classList.add(`theme-${nextTheme}`);
+        deckData.theme = nextTheme;
+        if (persist) {
+          localStorage.setItem("html-slide-editor-theme", nextTheme);
+          writeDeckData();
+        }
+        document.querySelectorAll(".theme-option").forEach((button) => {
+          button.classList.toggle("active", button.dataset.themeValue === nextTheme);
+        });
+        const floating = document.querySelector(".theme-floating-button");
+        if (floating) floating.setAttribute("aria-label", `디자인 템플릿 선택: ${themeLabel(nextTheme)}`);
+      };
 
       const defaultSlide = (type = "message") => {
         const templates = {
@@ -341,6 +363,8 @@
         if (inputName === null) return;
         const clone = document.documentElement.cloneNode(true);
         clone.querySelector(".page-sidebar")?.remove();
+        clone.querySelector(".theme-floating-button")?.remove();
+        clone.querySelector(".theme-modal")?.remove();
         clone.querySelector('input[type="file"][accept="image/*"]')?.remove();
         clone.querySelectorAll(".template-tools").forEach((el) => el.remove());
         clone.querySelectorAll("[contenteditable]").forEach((el) => el.removeAttribute("contenteditable"));
@@ -357,6 +381,69 @@
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      };
+
+      const renderThemePicker = () => {
+        if (document.querySelector(".theme-floating-button")) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "theme-floating-button";
+        button.textContent = "◐";
+        button.title = "디자인 템플릿 선택";
+        document.body.appendChild(button);
+
+        const modal = document.createElement("div");
+        modal.className = "theme-modal";
+        modal.hidden = true;
+        modal.innerHTML = `
+          <div class="theme-dialog" role="dialog" aria-modal="true" aria-labelledby="theme-dialog-title">
+            <div class="theme-dialog-header">
+              <div>
+                <h2 class="theme-dialog-title" id="theme-dialog-title">디자인 템플릿</h2>
+                <p class="theme-dialog-subtitle">슬라이드 내용은 유지하고 색상 톤만 변경합니다.</p>
+              </div>
+              <button class="theme-close" type="button" aria-label="닫기">×</button>
+            </div>
+            <div class="theme-grid">
+              ${themeTypes.map(([value, label, desc]) => `
+                <button class="theme-option" type="button" data-theme-value="${value}">
+                  <span class="theme-preview" aria-hidden="true">
+                    <span class="theme-preview-slide">
+                      <span class="theme-preview-title"></span>
+                      <span class="theme-preview-line"></span>
+                      <span class="theme-preview-line short"></span>
+                    </span>
+                  </span>
+                  <span class="theme-option-name">${label}</span>
+                  <span class="theme-option-desc">${desc}</span>
+                </button>
+              `).join("")}
+            </div>
+          </div>`;
+        document.body.appendChild(modal);
+
+        const closeModal = () => {
+          modal.hidden = true;
+          button.focus();
+        };
+        button.addEventListener("click", () => {
+          modal.hidden = false;
+          modal.querySelector(".theme-option.active")?.focus();
+        });
+        modal.querySelector(".theme-close").addEventListener("click", closeModal);
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) closeModal();
+        });
+        modal.querySelectorAll(".theme-option").forEach((option) => {
+          option.addEventListener("click", () => {
+            applyTheme(option.dataset.themeValue, true);
+            closeModal();
+          });
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !modal.hidden) closeModal();
+        });
+        applyTheme(deckData.theme);
       };
 
       const renderSidebar = () => {
@@ -413,6 +500,8 @@
       };
 
       renderDeck();
+      renderThemePicker();
+      applyTheme(deckData.theme);
       writeDeckData();
 
       imageInput.addEventListener("change", () => {
