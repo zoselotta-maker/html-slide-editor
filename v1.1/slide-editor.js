@@ -283,7 +283,6 @@
       const resizeSlides = () => {
         document.querySelectorAll(".slide-shell").forEach((shell) => {
           const scale = Math.min(shell.clientWidth / 1280, 1);
-          shell.style.height = `${720 * scale}px`;
           shell.querySelector(".slide")?.style.setProperty("--slide-scale", scale);
         });
       };
