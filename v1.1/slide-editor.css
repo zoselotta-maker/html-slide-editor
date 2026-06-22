@@ -129,14 +129,22 @@
       padding-left: 50px;
     }
 
-    .slide {
+    .slide-shell {
       position: relative;
       width: min(1280px, 100%);
-      aspect-ratio: 16 / 9;
+      height: 720px;
+    }
+
+    .slide {
+      position: relative;
+      width: 1280px;
+      height: 720px;
       background: var(--white);
       border: 1px solid var(--line);
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transform: scale(var(--slide-scale, 1));
+      transform-origin: top left;
     }
 
     .slide::before {
@@ -1341,10 +1349,15 @@
       .deck { display: block; padding: 0; }
       .page-sidebar { display: none; }
       .template-tools { display: none; }
+      .slide-shell {
+        width: 100vw;
+        height: 56.25vw;
+      }
       .slide {
         width: 100vw;
         height: 56.25vw;
         box-shadow: none;
+        transform: none;
         page-break-after: always;
       }
     }

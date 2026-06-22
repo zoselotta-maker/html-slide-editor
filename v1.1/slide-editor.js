@@ -250,6 +250,8 @@
       };
 
       const renderSlide = (slideData, index) => {
+        const shell = document.createElement("div");
+        shell.className = "slide-shell";
         const slide = document.createElement("section");
         slide.className = "slide";
         slide.dataset.slideId = slideData.id;
@@ -260,7 +262,8 @@
         addTemplateTools(slide);
         initializeEditable(slide);
         initializeImageBoxes(slide);
-        return slide;
+        shell.appendChild(slide);
+        return shell;
       };
 
       const fieldsTitle = (slideData) => {
@@ -271,9 +274,18 @@
       const renderDeck = () => {
         deck.innerHTML = "";
         deckData.slides.forEach((slideData, index) => deck.appendChild(renderSlide(slideData, index)));
+        resizeSlides();
         activeSlide = activeSlide ? orderedSlides().find((slide) => slide.dataset.slideId === activeSlide.dataset.slideId) || orderedSlides()[0] : orderedSlides()[0];
         renumberSlides();
         renderSidebar();
+      };
+
+      const resizeSlides = () => {
+        document.querySelectorAll(".slide-shell").forEach((shell) => {
+          const scale = Math.min(shell.clientWidth / 1280, 1);
+          shell.style.height = `${720 * scale}px`;
+          shell.querySelector(".slide")?.style.setProperty("--slide-scale", scale);
+        });
       };
 
       const addTemplateTools = (slide) => {
@@ -778,6 +790,7 @@
             toggle.querySelector(".icon").textContent = collapsed ? "▶" : "◀";
             toggle.setAttribute("aria-label", collapsed ? "슬라이드 인덱스 펼치기" : "슬라이드 인덱스 접기");
             toggle.title = collapsed ? "슬라이드 인덱스 펼치기" : "슬라이드 인덱스 접기";
+            requestAnimationFrame(resizeSlides);
           });
         }
         const slides = orderedSlides();
@@ -840,4 +853,5 @@
         const file = Array.from(event.clipboardData?.files || []).find((item) => item.type.startsWith("image/"));
         if (file) readFile(box, file);
       });
+      window.addEventListener("resize", resizeSlides);
     })();
